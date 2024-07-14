@@ -2,20 +2,27 @@
   "name": "server",
   "version": "1.0.0",
   "description": "auth backend",
-  "main": "server.js",
+  "main": "server.ts",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "start": "node server",
-    "dev": "nodemon server"
+    "dev": "nodemon server",
+    "tsc": "tsc"
   },
   "author": "Dipaloke biswas",
   "license": "ISC",
   "dependencies": {
     "@prisma/client": "^5.16.2",
+    "cors": "^2.8.5",
     "express": "^4.19.2",
     "prisma": "^5.16.2"
   },
   "devDependencies": {
-    "nodemon": "^3.1.4"
+    "@types/cors": "^2.8.17",
+    "@types/express": "^4.17.21",
+    "@types/node": "^20",
+    "nodemon": "^3.1.4",
+    "ts-node": "^10.9.2",
+    "typescript": "^5"
   }
 }
