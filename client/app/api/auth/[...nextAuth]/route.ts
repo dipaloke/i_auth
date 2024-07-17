@@ -1,3 +1,4 @@
+
 import NextAuth from "next-auth/next";
 import { NextAuthOptions } from "next-auth";
 
@@ -6,21 +7,6 @@ import Github from "next-auth/providers/github";
 import Credentials from "next-auth/providers/credentials";
 
 import axios from "axios";
-
-
-interface Session {
-  user: {
-    id: string;
-    email: string;
-    access_token?: string;
-  };
-}
-
-interface User {
-  id: string;
-  email: string;
-  access_token?: string;
-}
 
 const authOptions: NextAuthOptions = {
   secret: process.env.AUTH_SECRET,
