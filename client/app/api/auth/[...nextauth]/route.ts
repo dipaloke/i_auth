@@ -1,4 +1,3 @@
-
 import NextAuth from "next-auth/next";
 import { NextAuthOptions } from "next-auth";
 
@@ -15,12 +14,12 @@ const authOptions: NextAuthOptions = {
   },
   providers: [
     Google({
-      clientId: process.env.GOOGLE_ID as string,
-      clientSecret: process.env.GOOGLE_SECRET as string,
+      clientId: process.env.GOOGLE_CLIENT_ID as string,
+      clientSecret: process.env.GOOGLE_CLIENT_SECRET as string,
     }),
     Github({
-      clientId: process.env.GITHUB_ID as string,
-      clientSecret: process.env.GITHUB_SECRET as string,
+      clientId: process.env.GITHUB_CLIENT_ID as string,
+      clientSecret: process.env.GITHUB_CLIENT_SECRET as string,
     }),
     Credentials({
       name: "Credentials",
@@ -40,7 +39,7 @@ const authOptions: NextAuthOptions = {
         //api call
         try {
           const response = await axios.post(
-            `${process.env.SITE_URL}/api/v1/auth-service/auth/login`,
+            `${process.env.SITE_URL as string}/api/v1/auth-service/auth/login`,
             {
               email: credentials?.email,
               password: credentials.password,
