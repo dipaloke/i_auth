@@ -31,27 +31,32 @@ const authOptions: NextAuthOptions = {
         },
         password: { label: "Password", type: "password" },
       },
-      async authorize(credentials) {
+      async authorize(credentials, req) {
         if (!credentials?.email || !credentials.password) {
           throw new Error("Invalid credentials");
         }
-
         //api call
         try {
           const response = await axios.post(
-            `${process.env.SITE_URL as string}/api/v1/auth-service/auth/login`,
+            `${process.env.NEXT_PUBLIC_API_URL as string}/auth/login`,
             {
               email: credentials?.email,
               password: credentials.password,
-            }
+            },
+            {
+              headers: {
+                "Content-Type": "application/json",
+              },
+            },
+            
           );
+
           const { data } = response;
           console.log(data);
           return {
             id: data.userId,
             email: data.email,
             access_token: data.access_token,
-            key: "Hey cool",
           };
         } catch (error) {
           console.log(error);
@@ -66,7 +71,8 @@ const authOptions: NextAuthOptions = {
   callbacks: {
     async session({ session, token }) {
       console.log(`session: ${{ session }}, token: ${{ token }}`);
-      return {
+
+        return {
         ...session,
         user: {
           ...session.user,

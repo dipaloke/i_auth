@@ -1,11 +1,11 @@
 "use client";
 
-import React, { useState, useTransition } from "react";
-import { useSearchParams } from "next/navigation";
+import React, { useTransition } from "react";
+import { useRouter } from "next/navigation";
 import * as z from "zod";
-import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { signIn } from "next-auth/react";
+import axios from "axios";
+import { useForm } from "react-hook-form";
 
 import {
   Form,
@@ -15,71 +15,78 @@ import {
   FormLabel,
   FormMessage,
 } from "@/components/ui/form";
-import { Input } from "@/components/ui/input";
 import { Button } from "../ui/button";
 import { useToast } from "@/components/ui/use-toast";
 
-import { LoginSchema } from "@/app/schemas/index";
+import { Input } from "@/components/ui/input";
+import { RegisterSchema } from "@/app/schemas/index";
 import { CardWrapper } from "./cardWrapper";
 
 
-
-export const LoginForm = () => {
-  const searchParams = useSearchParams();
-  const callbackUrl = searchParams.get("callbackUrl") || "/";
-  const urlError =
-    searchParams.get("error") === "OAuthAccountNotLinked"
-      ? "Email is already in use with different provider!"
-      : "";
-
+export const RegisterForm = () => {
   const [isPending, startTransition] = useTransition();
   const { toast } = useToast();
+  const router = useRouter();
 
-  const form = useForm<z.infer<typeof LoginSchema>>({
-    resolver: zodResolver(LoginSchema),
+  const form = useForm<z.infer<typeof RegisterSchema>>({
+    resolver: zodResolver(RegisterSchema),
     defaultValues: {
+      name: "",
       email: "",
       password: "",
     },
   });
 
-  const onSubmit = async (values: z.infer<typeof LoginSchema>) => {
+  const onSubmit = async (values: z.infer<typeof RegisterSchema>) => {
     startTransition(async () => {
-      const result = await signIn("credentials", {
-        redirect: false,
-        email: values.email,
-        password: values.password,
-        callbackUrl,
-      });
+      try {
+        const response = await axios.post("/auth/register", values);
 
-      if (result?.error) {
+        if (response.status === 200) {
+          toast({
+            variant: "default",
+            title: "Success",
+            description: "You have successfully registered",
+          });
+          router.push("/auth/login");
+        }
+      } catch (error) {
         toast({
           variant: "destructive",
           title: "Error",
-          description: "something went wrong!"
+          description: "Registration failed",
         });
         form.reset();
-      } else {
-        toast({
-          variant: "default",
-          title: "Success",
-          description: "You have successfully logged in",
-        });
-        window.location.href = callbackUrl;
       }
     });
   };
 
   return (
     <CardWrapper
-      headerLabel="Welcome back"
-      backButtonLabel="Don't have an account?"
-      backButtonHref="/auth/register"
-      showSocial
+      headerLabel="Create an account"
+      backButtonLabel="Already have an account?"
+      backButtonHref="/auth/login"
     >
       <Form {...form}>
         <form className="space-y-6" onSubmit={form.handleSubmit(onSubmit)}>
           <div className="space-y-4">
+            <FormField
+              control={form.control}
+              name="name"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Name</FormLabel>
+                  <FormControl>
+                    <Input
+                      {...field}
+                      disabled={isPending}
+                      placeholder="John Doe"
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
             <FormField
               control={form.control}
               name="email"
@@ -112,15 +119,13 @@ export const LoginForm = () => {
                       type="password"
                     />
                   </FormControl>
-
                   <FormMessage />
                 </FormItem>
               )}
             />
           </div>
-          {urlError && <FormMessage>{urlError}</FormMessage>}
           <Button type="submit" className="w-full">
-            {isPending ? "Logging in..." : "Login"}
+            {isPending ? "Registering..." : "Register"}
           </Button>
         </form>
       </Form>
