@@ -1,12 +1,12 @@
-import { prisma } from "../src/utils/db";
-import bcrypt from "bcryptjs"
+import { prisma } from "../utils/db";
+import bcrypt from "bcryptjs";
 
 async function main() {
-  const hashedPassword = await bcrypt.hash('password', 10);
+  const hashedPassword = await bcrypt.hash("password", 10);
   await prisma.user.create({
     data: {
-      name: 'Admin User',
-      email: 'admin@example.com',
+      name: "Admin User",
+      email: "admin@example.com",
       password: hashedPassword,
     },
   });

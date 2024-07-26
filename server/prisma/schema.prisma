@@ -17,7 +17,6 @@ model User {
   id                 String       @id      @default(cuid())
   name               String
   email              String       @unique
-  emailVerified      DateTime?
   image              String?
   password           String
   status             String       @default("active")
@@ -57,14 +56,3 @@ model Session {
   createdAt          DateTime     @default(now())
   updatedAt          DateTime     @updatedAt
 }
-
-// model VerificationToken {
-//   id                 String       @id @default(cuid())
-//   email              String
-//   token              String       @unique
-//   expires            DateTime
-//   createdAt          DateTime     @default(now())
-//   updatedAt          DateTime     @updatedAt
-
-//   @@unique([email, token])
-// }
