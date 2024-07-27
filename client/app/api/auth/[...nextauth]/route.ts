@@ -47,19 +47,22 @@ const authOptions: NextAuthOptions = {
               headers: {
                 "Content-Type": "application/json",
               },
-            },
-            
+            }
           );
 
           const { data } = response;
-          console.log(data);
-          return {
-            id: data.userId,
-            email: data.email,
-            access_token: data.access_token,
-          };
+          console.log("Response data:", data);
+          if (data) {
+            return {
+              id: data.user.id,
+              name: data.user.name,
+              email: data.user.email,
+              access_token: data.token,
+            };
+          }
+          return null;
         } catch (error) {
-          console.log(error);
+          console.log("Error during authorization:", error);
           return null;
         }
       },
@@ -70,18 +73,33 @@ const authOptions: NextAuthOptions = {
   },
   callbacks: {
     async session({ session, token }) {
-      console.log(`session: ${{ session }}, token: ${{ token }}`);
+      console.log(
+        `session: ${JSON.stringify(session)}, token: ${JSON.stringify(token)}`
+      );
 
-        return {
-        ...session,
-        user: {
+      if (token) {
+        session.user = {
           ...session.user,
-          access_token: token.access_token,
-        },
-      };
+          id: token.id as string,
+          access_token: token.access_token as string,
+        };
+      }
+
+      return session;
+      // {
+      //   ...session,
+      //   user: {
+      //     ...session.user,
+      //     access_token: token.access_token,
+      //   },
+      // };
     },
     async jwt({ token, user }) {
+      // if (!token.sub) return token;
+
       if (user) {
+        // token.id = user.id;
+        // token.access_token = user.access_token;
         const u = user as unknown as any;
         return {
           ...token,

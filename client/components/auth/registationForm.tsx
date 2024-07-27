@@ -22,7 +22,6 @@ import { Input } from "@/components/ui/input";
 import { RegisterSchema } from "@/app/schemas/index";
 import { CardWrapper } from "./cardWrapper";
 
-
 export const RegisterForm = () => {
   const [isPending, startTransition] = useTransition();
   const { toast } = useToast();
@@ -40,7 +39,10 @@ export const RegisterForm = () => {
   const onSubmit = async (values: z.infer<typeof RegisterSchema>) => {
     startTransition(async () => {
       try {
-        const response = await axios.post("/auth/register", values);
+        const response = await axios.post(
+          `${process.env.NEXT_PUBLIC_API_URL as string}/auth/register`,
+          values
+        );
 
         if (response.status === 200) {
           toast({
