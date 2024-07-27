@@ -4,13 +4,27 @@ import cors from "cors";
 
 import authRoutes from "./routes/authRoutes";
 import { prisma } from "./utils/db";
+import bodyParser from "body-parser";
+import { NextFunction } from "express";
 
 dotenv.config();
 
 const app = express();
 
-app.use(cors());
 app.use(express.json());
+app.use(
+  cors({
+    origin: process.env.SITE_URL,
+  })
+);
+app.use(bodyParser.json());
+
+//logging incoming req
+app.use((req: Request, res: Response, next: NextFunction) => {
+  console.log(`Incoming requests: method: ${req.method} URL: ${req.url}`)
+  next()
+})
+
 
 // prisma
 //   .$connect()
@@ -21,7 +35,7 @@ app.use(express.json());
 //     console.error("Prisma failed to connect to DB", {error});
 //   });
 
-app.use("/api/auth", authRoutes);
+app.use("/auth", authRoutes);
 
 const PORT = process.env.PORT || 4000;
 

@@ -10,19 +10,21 @@ export const createUser = async (
   const salt = 10;
   const hashedPassword = await bcrypt.hash(password, salt);
 
-  return prisma.user.create({
+  const user = await prisma.user.create({
     data: {
       name,
       email,
       password: hashedPassword,
     },
   });
+  return user;
 };
 
 export const findUserByEmail = async (email: string): Promise<User | null> => {
-  return prisma.user.findUnique({
+  const user = await prisma.user.findUnique({
     where: {
       email,
     },
   });
+  return user;
 };

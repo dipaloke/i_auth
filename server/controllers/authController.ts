@@ -1,57 +1,78 @@
 import bcrypt from "bcryptjs";
 import { generateToken } from "../utils/jwt";
 import { Request, Response } from "express";
-import { loginSchema, registerSchema } from "../validators/authValidator";
 import { createUser, findUserByEmail } from "../services/userService";
 
 export const register = async (req: Request, res: Response) => {
-  const validationResult = registerSchema.safeParse(req.body);
-
-  if (!validationResult.success) {
-    return res.status(400).json({ errors: validationResult.error.errors });
-  }
-
-  const { name, email, password } = validationResult.data;
+  console.log("Handling /auth/register request:", req.method, req.url);
+  console.log("Request body:", JSON.stringify(req.body));
+  console.log("Request headers:", JSON.stringify(req.headers));
 
   try {
+    const { name, email, password } = req.body;
+
     const userExists = await findUserByEmail(email);
-    if (userExists)
-      return res.status(400).json({ message: "User already exists" });
+
+    if (userExists) {
+      console.log("User already exists:", email);
+      return res.status(400).json({ error: "User already exists" });
+    }
 
     const user = await createUser(name, email, password);
 
-    res.status(201).json({ user, message: "User registered successfully" });
+    const token = generateToken(user.id);
+
+    const response = {
+      userId: user.id,
+      email: user.email,
+      access_token: token,
+      // user, message: "User registered successfully"
+    };
+    console.log("Register response:", JSON.stringify(response));
+
+    res.status(201).json(response);
+    // res.status(201).json({ response, message: "User registered successfully" });
   } catch (error) {
     console.error("Error during user registration: ", error);
-    res.status(400).json({ message: "Invalid user data", error: { error } });
+    res.status(500).json({ error: "Internal server error"});
   }
 };
 
 export const login = async (req: Request, res: Response) => {
-  const validationResult = loginSchema.safeParse(req.body);
+  console.log("Handling /auth/login request:", req.method, req.url);
+  console.log("Request body:", JSON.stringify(req.body));
+  console.log("Request headers:", JSON.stringify(req.headers));
 
-  if (!validationResult.success) {
-    return res.status(400).json({ errors: validationResult.error.errors });
-  }
-
-  const { email, password } = validationResult.data;
   try {
+    const { email, password } = req.body;
+
     const user = await findUserByEmail(email);
 
-    if (!user)
-      return res.status(400).json({ message: "Invalid email or password" });
+    if (!user) {
+      console.log("Invalid email or password");
+      return res.status(401).json({ message: "Invalid email or password" });
+    }
 
     const isValidPass = await bcrypt.compare(password, user.password);
-    if (!isValidPass)
-      return res.status(400).json({ message: "Invalid email or password" });
+    if (!isValidPass) {
+      console.log("Invalid password");
+      return res.status(401).json({ message: "Invalid email or password" });
+    }
 
     const token = generateToken(user.id);
-    res.json({
-      token,
-      user: { id: user.id, name: user.name, email: user.email },
-    });
+
+    const response = {
+      userId: user.id,
+      email: user.email,
+      access_token: token,
+      // token,
+      // user: {id: user.id, name: user.name, email: user.email}
+    };
+    console.log("Login Response:", JSON.stringify(response));
+
+    res.json(response);
   } catch (error) {
-    console.error("Error during user login: ", error);
-    res.status(500).json({ message: "Server error" });
+    console.error("Error during user login /auth/login: ", error);
+    res.status(500).json({ error: "Internal Server error" });
   }
 };
